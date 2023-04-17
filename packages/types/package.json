@@ -1,0 +1,9 @@
+{
+  "name": "@webrtc/types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}
