@@ -1,5 +1,7 @@
 # compiled output
 /dist
+/html
+/secrets
 /node_modules
 
 # Logs

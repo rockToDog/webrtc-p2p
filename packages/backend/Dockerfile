@@ -8,8 +8,6 @@ WORKDIR /var/webrtc-p2p
 
 COPY --chown=node:node package.json ./
 
-COPY --chown=node:node /dist ./dist
-
 RUN npm config set registry https://registry.npm.taobao.org/
 
 RUN npm cache clean --force && npm i
@@ -38,7 +36,9 @@ FROM node:18-alpine As production
 COPY --chown=node:node --from=build /var/webrtc-p2p/node_modules ./node_modules
 COPY --chown=node:node --from=build /var/webrtc-p2p/dist ./dist
 
+COPY --chown=node:node /html ./html
+
 # 启动服务
-CMD [ "node", "dist/server/main.js" ]
+CMD [ "node", "dist/main.js" ]
 
 EXPOSE 3000

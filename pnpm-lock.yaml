@@ -5,12 +5,14 @@ importers:
   .:
     specifiers:
       '@vitejs/plugin-vue': ^4.1.0
+      ipaddr.js: ^2.0.1
       socket.io: ^4.6.1
       typescript: ^4.9.3
       vite: ^4.2.0
       vue: ^3.2.47
       vue-tsc: ^1.2.0
     dependencies:
+      ipaddr.js: 2.0.1
       socket.io: 4.6.1
       vue: 3.2.47
     devDependencies:
@@ -3618,6 +3620,11 @@ packages:
   /ipaddr.js/1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
+
+  /ipaddr.js/2.0.1:
+    resolution: {integrity: sha512-1qTgH9NG+IIJ4yfKs2e6Pp1bZg8wbDbKHT21HrLIeYBTRLgMYKnMTPAuI3Lcs61nfx5h1xlXnbJtH1kX5/d/ng==}
+    engines: {node: '>= 10'}
+    dev: false
 
   /is-arrayish/0.2.1:
     resolution: {integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==}

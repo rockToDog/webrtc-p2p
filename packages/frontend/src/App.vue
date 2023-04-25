@@ -137,6 +137,9 @@ const handleSendChannelStatusChange = (event: Event) => {
 };
 const connectPeers = () => {
   peerConnection = new RTCPeerConnection();
+  peerConnection.addEventListener("connectionstatechange", (event) => {
+    console.log(event);
+  });
   peerConnection.addEventListener("datachannel", (event) => {
     receiveChannel = event.channel;
     receiveChannel.onmessage = (e) => {
@@ -149,8 +152,9 @@ const connectPeers = () => {
 };
 
 const disconnectPeers = () => {
-  sendChannel.close();
-  peerConnection.close();
+  sendChannel?.close();
+  receiveChannel?.close();
+  peerConnection?.close();
 };
 
 const receiveFile = (data: ArrayBuffer) => {
@@ -263,16 +267,30 @@ const reload = () => {
     }}</a-button>
     <div>
       <div class="col-span-full" v-for="user in users">
-        <div v-show="user.id !== local.id"
-          class="transition-all bg-green-50 hover:bg-green-100 mt-2 flex rounded-lg px-3 py-3">
+        <div
+          v-show="user.id !== local.id"
+          class="transition-all bg-green-50 hover:bg-green-100 mt-2 flex rounded-lg px-3 py-3"
+        >
           <div class="text-center">
             <div class="flex text-sm leading-6 text-gray-600">
-              <label :for="user.id"
-                class="relative cursor-pointer rounded-md font-semibold text-gray-500 hover:text-gray-600">
-                <span><i :class="`pr-2 iconfont ${user.avatar ? equipmentType[user.avatar] : 'icon-windows'
-                  }`" />{{ user.name ?? user.id }}</span>
-                <input @change="handleFileInputChange(user.id, $event)" :id="user.id" name="file-upload" type="file"
-                  class="sr-only" />
+              <label
+                :for="user.id"
+                class="relative cursor-pointer rounded-md font-semibold text-gray-500 hover:text-gray-600"
+              >
+                <span
+                  ><i
+                    :class="`pr-2 iconfont ${
+                      user.avatar ? equipmentType[user.avatar] : 'icon-windows'
+                    }`"
+                  />{{ user.name ?? user.id }}</span
+                >
+                <input
+                  @change="handleFileInputChange(user.id, $event)"
+                  :id="user.id"
+                  name="file-upload"
+                  type="file"
+                  class="sr-only"
+                />
               </label>
             </div>
           </div>
@@ -280,44 +298,71 @@ const reload = () => {
       </div>
     </div>
   </a-space>
-  <a-modal v-model:visible="visible.transmit" :title="receivedFile.name" :maskClosable="false">
+  <a-modal
+    v-model:visible="visible.transmit"
+    :title="receivedFile.name"
+    :maskClosable="false"
+  >
     <template #footer>
-      <a-button v-show="direction === 'source'" key="submit" type="primary" @click="sendFile">发送</a-button>
-      <a-button v-show="direction === 'source'" key="back" @click="closeModal">取消</a-button>
+      <a-button
+        v-show="direction === 'source'"
+        key="submit"
+        type="primary"
+        @click="sendFile"
+        >发送</a-button
+      >
+      <a-button v-show="direction === 'source'" key="back" @click="closeModal"
+        >取消</a-button
+      >
     </template>
     <a-space :size="20">
       <div class="text-gray-500">
         文件大小:
         {{ parseInt(receivedFile.size / 1024 / 1024 + "") }}M
       </div>
-      <a-progress type="circle" :percent="progress" :width="80" strokeColor="black" :success="{ strokeColor: 'black' }" />
+      <a-progress
+        type="circle"
+        :percent="progress"
+        :width="80"
+        strokeColor="black"
+        :success="{ strokeColor: 'black' }"
+      />
     </a-space>
   </a-modal>
-  <a-modal v-model:visible="visible.user" title="给自己起个名字" :maskClosable="false">
+  <a-modal
+    v-model:visible="visible.user"
+    title="给自己起个名字"
+    :maskClosable="false"
+  >
     <template #footer>
-      <a-button key="submit" type="primary" @click="updateUserInfo">确定</a-button>
+      <a-button key="submit" type="primary" @click="updateUserInfo"
+        >确定</a-button
+      >
       <a-button key="back" @click="closeModal">取消</a-button>
     </template>
     <a-space style="width: 100%" direction="vertical" size="large">
       <a-input v-model:value="local.name" />
       <a-radio-group v-model:value="local.avatar">
         <a-radio :value="1">
-          <i class="pr-2 iconfont icon-windows cursor-pointer" /></a-radio>
+          <i class="pr-2 iconfont icon-windows cursor-pointer"
+        /></a-radio>
         <a-radio :value="2">
-          <i class="pr-2 iconfont icon-Macmini cursor-pointer" /></a-radio>
+          <i class="pr-2 iconfont icon-Macmini cursor-pointer"
+        /></a-radio>
         <a-radio :value="3">
-          <i class="pr-2 iconfont icon-iPhoneX cursor-pointer" /></a-radio>
+          <i class="pr-2 iconfont icon-iPhoneX cursor-pointer"
+        /></a-radio>
         <a-radio :value="4">
-          <i class="pr-2 iconfont icon-zhikeshuma- cursor-pointer" /></a-radio>
+          <i class="pr-2 iconfont icon-zhikeshuma- cursor-pointer"
+        /></a-radio>
         <a-radio :value="5">
-          <i class="pr-2 iconfont icon-anzhuo cursor-pointer" /></a-radio>
+          <i class="pr-2 iconfont icon-anzhuo cursor-pointer"
+        /></a-radio>
       </a-radio-group>
     </a-space>
   </a-modal>
   <div class="floatButton">
-    <a-button type="primary" @click="reload">
-      ⚡️ refresh
-    </a-button>
+    <a-button type="primary" @click="reload"> ⚡️ refresh </a-button>
   </div>
 </template>
 

@@ -8,9 +8,12 @@
     "build:front": "cd ./packages/frontend && npm run build",
     "dev:back": "cd ./packages/backend && npm run start:dev",
     "build:back": "cd ./packages/backend && npm run build",
+    "start:docker": "cd ./packages/backend && npm run start:docker",
+    "build:docker": "cd ./packages/backend && npm run build:docker",
     "preview": "vite preview"
   },
   "dependencies": {
+    "ipaddr.js": "^2.0.1",
     "socket.io": "^4.6.1",
     "vue": "^3.2.47"
   },

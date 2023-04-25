@@ -5,15 +5,9 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
+import * as ipaddr from 'ipaddr.js';
 
-export type User = {
-  name: string;
-  avatar: string;
-  id: string;
-};
-
-// import { User } from '@webrtc/types';
 @WebSocketGateway({
   cors: {
     methods: ['GET', 'POST'],
@@ -22,61 +16,77 @@ export type User = {
   allowEIO3: true,
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server;
-  users: Array<User & { client: Socket }> = [];
+  @WebSocketServer() server: Server;
+
+  getIp(client: Socket) {
+    let ip = client.handshake.address;
+    if (ipaddr.parse(ip).range() === 'ipv4Mapped') {
+      ip = ipaddr.IPv6.parse(ip).toIPv4Address().octets.join('.');
+    }
+    if (ipaddr.parse(ip).range() === 'private') {
+      return 'private';
+    }
+    return ip;
+  }
 
   async handleConnection(client: Socket) {
-    const user = {
+    const ip = this.getIp(client);
+    client.join(ip);
+    client.data.name = client.handshake?.query?.name;
+    client.data.avatar = client.handshake?.query?.avatar;
+    client.emit('user', {
       id: client.id,
-      name: client.handshake?.query?.name,
-      avatar: client.handshake?.query?.avatar,
-    } as User;
-
-    this.users.push({ ...user, client });
-    client.emit('user', user);
-    this.server.emit(
+      ...client.data,
+    });
+    const sockets = await this.server.to(ip).fetchSockets();
+    this.server.to(ip).emit(
       'users',
-      this.users.map(({ client, ...user }) => user),
+      sockets.map((client) => ({
+        id: client.id,
+        ...client.data,
+      })),
     );
   }
 
   async handleDisconnect(client: Socket) {
+    const ip = this.getIp(client);
     client.disconnect();
-    this.users = this.users.filter((i) => i.id !== client.id);
-    this.server.emit(
+    const sockets = await this.server.to(ip).fetchSockets();
+    this.server.to(ip).emit(
       'users',
-      this.users.map(({ client, ...user }) => user),
+      sockets.map((client) => ({
+        id: client.id,
+        ...client.data,
+      })),
     );
   }
 
   @SubscribeMessage('user')
   async updateUser(client, data) {
-    this.users = this.users.map((i) => {
-      if (i.id !== client.id) {
-        return i;
-      } else {
-        return {
-          ...i,
-          ...data,
-        };
-      }
-    });
+    client.data = {
+      ...data,
+    };
     client.emit('user', {
       id: client.id,
       name: data?.name,
       avatar: data?.avatar,
     });
-    client.broadcast.emit(
+    const ip = this.getIp(client);
+    const sockets = await this.server.to(ip).fetchSockets();
+    this.server.to(ip).emit(
       'users',
-      this.users.map(({ client, ...user }) => user),
+      sockets.map((client) => ({
+        id: client.id,
+        ...client.data,
+      })),
     );
   }
 
   @SubscribeMessage('offer')
   async onOffer(client, data) {
-    const targetClient = this.users.find((i) => i.id === data?.user)?.client;
-    if (targetClient) {
-      targetClient.emit('receiveOffer', {
+    const sockets = await this.server.to(data.user).fetchSockets();
+    if (sockets.length) {
+      sockets[0].emit('receiveOffer', {
         source: client.id,
         data: {
           sdp: data.sdp,
@@ -87,9 +97,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('answer')
   async onAnswer(client, data) {
-    const targetClient = this.users.find((i) => i.id === data?.user)?.client;
-    if (targetClient) {
-      targetClient.emit('receiveAnswer', {
+    const sockets = await this.server.to(data.user).fetchSockets();
+    if (sockets.length) {
+      sockets[0].emit('receiveAnswer', {
         source: client.id,
         data: {
           sdp: data.sdp,
