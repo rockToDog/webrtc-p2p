@@ -3,7 +3,8 @@
 **这是一个简单的webrtc文件传输工具，你可以在任何安装了浏览器的设备之前进行文件传输。     
 前端使用vue3，后端使用nestjs。   
 使用socket.io提供信令服务，使用webrtc进行p2p数据传输。   
-使用monorepo、pnpm组织管理项目。**
+使用monorepo、pnpm组织管理项目。  
+体验:<a target="_blank" href="https://searchingdog.fun:3000/">https://searchingdog.fun:3000/</a>**
 
 ### 启动程序
 1. 安装依赖
