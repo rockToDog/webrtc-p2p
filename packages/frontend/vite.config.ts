@@ -18,6 +18,8 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    target: "es2015",
+    cssTarget: "chrome61"
   },
   plugins: [vue()],
   server: {

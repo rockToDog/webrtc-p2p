@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { io, Socket } from "socket.io-client";
 import { ref, onMounted, onUnmounted } from "vue";
-import { download } from "./utils/index";
+import { download, readAsArrayBuffer } from "./utils/index";
 import { User } from "@webrtc/types";
 
 const equipmentType: Record<string | number, string> = {
@@ -196,11 +196,14 @@ const sendFile = async () => {
   );
 
   let offset = 0;
-  let buffer = null;
+  let buffer: ArrayBuffer;
   const chunkSize = peerConnection.sctp?.maxMessageSize || 65535;
   while (offset < selectedFile.size) {
     const slice = selectedFile.slice(offset, offset + chunkSize);
-    buffer = await slice.arrayBuffer();
+    buffer =
+      typeof slice.arrayBuffer === "function"
+        ? await slice.arrayBuffer()
+        : await readAsArrayBuffer(slice);
     if (sendChannel.bufferedAmount > chunkSize) {
       await new Promise((resolve) => {
         sendChannel.onbufferedamountlow = resolve;

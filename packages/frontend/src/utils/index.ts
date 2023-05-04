@@ -75,4 +75,14 @@ export const download = async (data: {
   window.URL.revokeObjectURL(link);
 };
 
+export const readAsArrayBuffer = (blob: Blob): Promise<ArrayBuffer> => {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent) => {
+      resolve(reader.result as ArrayBuffer)
+    }
+    reader.readAsArrayBuffer(blob);
+  })
+}
+
 export default createApi;
